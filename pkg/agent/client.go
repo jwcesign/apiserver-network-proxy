@@ -381,6 +381,7 @@ func (a *Client) Serve() {
 			resp.GetDialResponse().Random = dialReq.Random
 
 			start := time.Now()
+			klog.Info("jw:%#v", *dialReq)
 			conn, err := net.DialTimeout(dialReq.Protocol, dialReq.Address, dialTimeout)
 			if err != nil {
 				resp.GetDialResponse().Error = err.Error()
