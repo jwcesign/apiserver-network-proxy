@@ -332,6 +332,8 @@ func (a *Client) initializeAuthContext(ctx context.Context) (context.Context, er
 // gRPC stream. Successful Connect is required before Serve. The
 // The requests include things like opening a connection to a server,
 // streaming data and close the connection.
+var count = 0
+
 func (a *Client) Serve() {
 	defer a.cs.RemoveClient(a.serverID)
 	defer func() {
@@ -361,6 +363,8 @@ func (a *Client) Serve() {
 			klog.ErrorS(err, "could not read stream")
 			return
 		}
+		klog.Infof("jw2:%v", count)
+		count++
 
 		klog.V(5).InfoS("[tracing] recv packet", "type", pkt.Type)
 
