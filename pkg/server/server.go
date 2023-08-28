@@ -55,6 +55,7 @@ type ProxyClientConnection struct {
 
 const (
 	destHost key = iota
+	agentId
 )
 
 func (c *ProxyClientConnection) send(pkt *client.Packet) error {
@@ -167,8 +168,13 @@ func genContext(proxyStrategies []ProxyStrategy, reqHost string) context.Context
 	return ctx
 }
 
-func (s *ProxyServer) getBackend(reqHost string) (Backend, error) {
+func (s *ProxyServer) getBackend(reqHost string, agentIds ...string) (Backend, error) {
 	ctx := genContext(s.proxyStrategies, reqHost)
+
+	for _, id := range agentIds {
+		ctx = context.WithValue(ctx, agentId, id)
+	}
+
 	for _, bm := range s.BackendManagers {
 		be, err := bm.Backend(ctx)
 		if err == nil {
@@ -194,15 +200,15 @@ func (s *ProxyServer) addBackend(agentID string, conn agent.AgentService_Connect
 			}
 			for _, ipv4 := range agentIdentifiers.IPv4 {
 				klog.V(5).InfoS("Add the agent to DestHostBackendManager", "agent address", ipv4)
-				s.BackendManagers[i].AddBackend(ipv4, pkgagent.IPv4, conn)
+				backend = s.BackendManagers[i].AddBackend(ipv4, pkgagent.IPv4, conn)
 			}
 			for _, ipv6 := range agentIdentifiers.IPv6 {
 				klog.V(5).InfoS("Add the agent to DestHostBackendManager", "agent address", ipv6)
-				s.BackendManagers[i].AddBackend(ipv6, pkgagent.IPv6, conn)
+				backend = s.BackendManagers[i].AddBackend(ipv6, pkgagent.IPv6, conn)
 			}
 			for _, host := range agentIdentifiers.Host {
 				klog.V(5).InfoS("Add the agent to DestHostBackendManager", "agent address", host)
-				s.BackendManagers[i].AddBackend(host, pkgagent.Host, conn)
+				backend = s.BackendManagers[i].AddBackend(host, pkgagent.Host, conn)
 			}
 		case *DefaultRouteBackendManager:
 			agentIdentifiers, err := getAgentIdentifiers(conn)
@@ -331,6 +337,8 @@ func NewProxyServer(serverID string, proxyStrategies []ProxyStrategy, serverCoun
 			bms = append(bms, NewDefaultBackendManager())
 		case ProxyStrategyDefaultRoute:
 			bms = append(bms, NewDefaultRouteBackendManager())
+		case ProxyStrategyAgentId:
+			bms = append(bms, NewAgentIdBackendManager())
 		default:
 			klog.V(4).InfoS("Unknonw proxy strategy", "strategy", ps)
 		}

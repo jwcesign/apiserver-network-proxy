@@ -253,6 +253,7 @@ func (o *ProxyRunOptions) Validate() error {
 			case string(server.ProxyStrategyDestHost):
 			case string(server.ProxyStrategyDefault):
 			case string(server.ProxyStrategyDefaultRoute):
+			case string(server.ProxyStrategyAgentId):
 			default:
 				return fmt.Errorf("unknown proxy strategy: %s, available strategy are: default, destHost, defaultRoute", ps)
 			}
