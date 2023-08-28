@@ -75,7 +75,7 @@ func (t *Tunnel) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	klog.V(4).Infof("jw2:%v,%v,%v,%v, Backend: %v", r.Host, r.URL.Path, r.URL.RawPath, r.Header)
+	klog.V(4).Infof("jw2:%v,%v,%v, Backend: %v", r.Host, r.Method, r.Header)
 
 	connected := make(chan struct{})
 	connection := &ProxyClientConnection{
