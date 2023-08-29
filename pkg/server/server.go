@@ -409,6 +409,7 @@ func (s *ProxyServer) serveRecvFrontend(stream client.ProxyService_ProxyServer, 
 	var err error
 
 	for pkt := range recvCh {
+		klog.Info("jw555:%v", pkt.Type)
 		switch pkt.Type {
 		case client.PacketType_DIAL_REQ:
 			klog.V(5).Infoln("Received DIAL_REQ")
